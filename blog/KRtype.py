@@ -175,7 +175,7 @@ class Assembler:
 def assemble(string):  # 분해된 한글을 조합
     out = Assembler(string)
     while out.state:
-        print(out.state, out.result, out.temp)
+        # print(out.state, out.result, out.temp) # for debug
         Assembler.states[out.state](out)
 
     if out.temp:

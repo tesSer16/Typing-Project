@@ -80,88 +80,103 @@ class Assembler:
         self.string = string[1:]
         self.result = ""
         self.temp = string[0]
-        self.counter = 1
+        self.state = 1
 
-    def B1C(self, counter):
+    def B1C(self, state):
         if not self.string:
             return 0
         else:
             self.temp += self.string.pop(0)
-            return counter
+            return state
 
     def end(self):
-        self.counter = 1
+        self.state = 1
         self.result += combination(self.temp[:-1])
         self.temp = self.temp[-1]
 
     def state1(self):
         if self.temp[0] in cho_list:
-            self.counter = self.B1C(2)
+            self.state = self.B1C(4)
+        else:
+            self.state = 2
+
+    def state2(self):
+        if self.temp[0] in jung_list:
+            self.state = self.B1C(3)
         else:  # single end
             self.result += self.temp
             self.temp = ""
-            self.counter = self.B1C(1)
-
-    def state2(self):
-        if self.temp[1] in jung_list:
-            self.counter = self.B1C(3)
-        else:
-            self.counter = 4
+            self.state = self.B1C(1)
 
     def state3(self):
-        if self.temp[1:3] in double_vowels_dict:
-            self.temp = self.temp.replace(self.temp[1:3], double_vowels_dict[self.temp[1:3]])
-            self.counter = self.B1C(6)
+        if self.temp in double_vowels_dict:
+            self.temp = double_vowels_dict[self.temp]
+            self.result += self.temp
+            self.temp = ""
+            self.state = self.B1C(1)
         else:
-            self.counter = 6
+            self.end()
 
     def state4(self):
-        if self.temp in double_consonants_dict:
-            self.temp = double_consonants_dict[self.temp]
-            self.counter = self.B1C(5)
+        if self.temp[1] in jung_list:
+            self.state = self.B1C(5)
         else:
-            self.end()
+            self.state = 6
 
     def state5(self):
-        if self.temp[2] in jung_list:
-            self.temp = inv_double_consonants_dict[self.temp]  # 이중자음 분리
-            self.result += self.temp[0]  # partial end
-            self.temp = self.temp[1:]
-            self.counter = self.B1C(3)
+        if self.temp[1:3] in double_vowels_dict:
+            self.temp = self.temp.replace(self.temp[1:3], double_vowels_dict[self.temp[1:3]])
+            self.state = self.B1C(8)
         else:
-            self.end()
+            self.state = 8
 
     def state6(self):
-        if self.temp[2] in jong_list and self.temp[2] != ' ':
-            self.counter = self.B1C(7)
+        if self.temp in double_consonants_dict:
+            self.temp = double_consonants_dict[self.temp]
+            self.state = self.B1C(7)
         else:
             self.end()
 
     def state7(self):
-        if self.temp[2:4] in double_consonants_dict:
-            self.temp = self.temp.replace(self.temp[2:4], double_consonants_dict[self.temp[2:4]])
-            self.counter = self.B1C(8)
+        if self.temp[2] in jung_list:
+            self.temp = inv_double_consonants_dict[self.temp]  # 이중자음 분리
+            self.result += self.temp[0]  # partial end
+            self.temp = self.temp[1:]
+            self.state = self.B1C(5)
         else:
-            self.counter = 8
+            self.end()
 
     def state8(self):
+        if self.temp[2] in jong_list and self.temp[2] != ' ':
+            self.state = self.B1C(9)
+        else:
+            self.end()
+
+    def state9(self):
+        if self.temp[2:4] in double_consonants_dict:
+            self.temp = self.temp.replace(self.temp[2:4], double_consonants_dict[self.temp[2:4]])
+            self.state = self.B1C(10)
+        else:
+            self.state = 10
+
+    def state10(self):
         if self.temp[-1] in jung_list:
             if self.temp[-2] in inv_double_consonants_dict:
                 self.temp = self.temp.replace(self.temp[-2], inv_double_consonants_dict[self.temp[-2]])
             self.result += combination(self.temp[:-2])  # partial end
             self.temp = self.temp[-2:]
-            self.counter = self.B1C(3)
+            self.state = self.B1C(5)
         else:
             self.end()
 
-    states = [None, state1, state2, state3, state4, state5, state6, state7, state8]
+    states = [None, state1, state2, state3, state4, state5, state6, state7, state8, state9, state10]
 
 
 def assemble(string):  # 분해된 한글을 조합
     out = Assembler(string)
-    while out.counter:
-        print(out.counter, out.result, out.temp)
-        Assembler.states[out.counter](out)
+    while out.state:
+        print(out.state, out.result, out.temp)
+        Assembler.states[out.state](out)
 
     if out.temp:
         if len(out.temp) == 1:

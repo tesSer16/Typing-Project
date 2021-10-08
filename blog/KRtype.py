@@ -1,4 +1,4 @@
-# KRtype_v3.0 made by tesSer16
+# KRKRtype_v3.1 made by tesSer16
 
 cho_list = ['ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ',
             'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ']
@@ -138,8 +138,9 @@ class Assembler:
             self.end()
 
     def state7(self):
-        if self.temp[2] in jung_list:
-            self.temp = inv_double_consonants_dict[self.temp]  # 이중자음 분리
+        if self.temp[1] in jung_list:
+            # 이중자음 분리
+            self.temp = self.temp.replace(self.temp[-2], inv_double_consonants_dict[self.temp[-2]])
             self.result += self.temp[0]  # partial end
             self.temp = self.temp[1:]
             self.state = self.B1C(5)
@@ -162,6 +163,7 @@ class Assembler:
     def state10(self):
         if self.temp[-1] in jung_list:
             if self.temp[-2] in inv_double_consonants_dict:
+                # 이중자음 분리
                 self.temp = self.temp.replace(self.temp[-2], inv_double_consonants_dict[self.temp[-2]])
             self.result += combination(self.temp[:-2])  # partial end
             self.temp = self.temp[-2:]
@@ -175,7 +177,7 @@ class Assembler:
 def assemble(string):  # 분해된 한글을 조합
     out = Assembler(string)
     while out.state:
-        # print(out.state, out.result, out.temp) # for debug
+        # print(f"{out.state}, result: {out.result}, temp: {out.temp}")  # for debug
         Assembler.states[out.state](out)
 
     if out.temp:

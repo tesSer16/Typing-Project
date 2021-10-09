@@ -11,5 +11,5 @@ def Tprint(string):
 
 if __name__ == "__main__":
     input()
-    Tprint("ㅘ! 'ㄲ', 'ㅠ', 'ㄺ'의 합성인 굴국(뀱) 먹으러 ㄱㄱ싱~")
+    Tprint("쀒")
     input()
